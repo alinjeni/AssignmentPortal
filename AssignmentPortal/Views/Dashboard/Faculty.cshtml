@@ -1,0 +1,19 @@
+﻿@model FacultyDashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<select id="chartTypeSelector" class="form-control w-25 shadow-sm mb-3">
+    <option value="assignmentsPerClassroom">Assignments Per Classroom</option>
+    <option value="classAverage">Class Average Per Assignment</option>
+    <option value="submissionsPerStudent">Submissions Per Student</option>
+</select>
+
+<canvas id="dashboardChart" class="w-75 mx-auto d-block"></canvas>
+
+@section Scripts {
+    <partial name="_ToastrMessage" />
+    <partial name="_DashboardChartScriptsPartial" />
+}

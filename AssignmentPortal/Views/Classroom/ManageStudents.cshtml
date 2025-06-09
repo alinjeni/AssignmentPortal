@@ -1,0 +1,94 @@
+﻿@model ManageClassroomStudentsViewModel
+@{
+    ViewData["Title"] = "Manage Students in " + Model.Classroom.Name;
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="text-primary"><i class="bi bi-people-fill me-2"></i>Manage Students - @Model.Classroom.Name</h3>
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left-circle me-1"></i> Back to List
+        </a>
+    </div>
+
+    <div class="row g-4">
+        <!-- Available Students Section -->
+        <div class="col-md-6">
+            <div class="border rounded shadow-sm p-4 bg-light">
+                <h5 class="mb-3 text-dark"><i class="bi bi-person-plus-fill me-2"></i>Available Students</h5>
+                <form method="post" asp-action="AddStudent">
+                    <input type="hidden" name="classroomId" value="@Model.Classroom.Id" />
+
+                    <div class="mb-3">
+                        <select class="form-select" name="studentId" required>
+                            @foreach (var student in Model.AvailableStudents)
+                            {
+                                <option value="@student.Id">@student.Name (@student.Email)</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        @if (Model.AvailableStudents.Count > 0)
+                        {
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-plus-circle me-1"></i> Add to Classroom
+                            </button>
+                        }
+                        else
+                        {
+                            <span class="btn btn-secondary disabled" aria-disabled="true">
+                                No students available to add
+                            </span>
+                        }
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Current Students Section -->
+        <div class="col-md-6">
+            <div class="border rounded shadow-sm p-4 bg-light">
+                <h5 class="mb-3 text-dark"><i class="bi bi-people me-2"></i>Current Students</h5>
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-secondary">
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Remove</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.CurrentStudents == null || !Model.CurrentStudents.Any())
+                        {
+                            <tr>
+                                <td colspan="3" class="text-center text-muted">
+                                    <i class="bi bi-info-circle me-1"></i>No students currently enrolled in this classroom.
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var student in Model.CurrentStudents)
+                            {
+                                <tr>
+                                    <td>@student.Name</td>
+                                    <td>@student.Email</td>
+                                    <td>
+                                        <form method="post" asp-action="RemoveStudent" class="d-inline">
+                                            <input type="hidden" name="classroomId" value="@Model.Classroom.Id" />
+                                            <input type="hidden" name="studentId" value="@student.Id" />
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

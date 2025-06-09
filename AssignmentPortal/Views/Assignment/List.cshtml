@@ -1,0 +1,92 @@
+﻿@model IEnumerable<Assignment>
+@{
+    var classroomId = ViewBag.ClassroomId;
+    var currentFilter = (ViewBag.Filter as string) ?? "active";
+    bool isFaculty = User.IsInRole("Faculty");
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="mb-0 text-primary">Assignments</h3>
+        <div>
+            <a asp-controller="Classroom" asp-action="Index" class="btn btn-sm btn-outline-secondary me-2">
+                <i class="bi bi-arrow-left-circle me-1"></i> Back
+            </a>
+            @if (isFaculty)
+            {
+                <a asp-action="Create" asp-route-classroomId="@classroomId" class="btn btn-sm btn-success shadow-sm">
+                    <i class="bi bi-plus-circle me-1"></i> Create Assignment
+                </a>
+            }
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-end mb-4">
+        <div class="btn-group" role="group">
+            <a asp-action="List" asp-route-classroomId="@classroomId" asp-route-filter="active"
+               class="btn btn-sm @(currentFilter == "active" ? "btn-primary" : "btn-outline-primary")">
+                Active
+            </a>
+            <a asp-action="List" asp-route-classroomId="@classroomId" asp-route-filter="archived"
+               class="btn btn-sm @(currentFilter == "archived" ? "btn-secondary" : "btn-outline-secondary")">
+                Archived
+            </a>
+        </div>
+    </div>
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="alert alert-info text-center rounded shadow-sm">
+            No @currentFilter assignments found.
+        </div>
+    }
+    else
+    {
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            @foreach (var assignment in Model)
+            {
+                <div class="col">
+                    <div class="card h-100 shadow-sm border-start border-4 border-@(assignment.IsArchived ? "secondary" : "primary")">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <a asp-action="Details" asp-route-id="@assignment.Id" class="text-decoration-none text-dark fw-semibold">
+                                    @assignment.Title
+                                </a>
+                            </h5>
+                            <p class="card-text mb-1 text-muted small">
+                                <i class="bi bi-calendar-event me-1"></i><strong>Due:</strong> @assignment.DueDate.ToShortDateString()
+                            </p>
+                            <p class="card-text text-muted">@assignment.Description</p>
+                        </div>
+                        @if (isFaculty)
+                        {
+                            <div class="card-footer bg-white d-flex justify-content-end flex-wrap gap-2 border-top">
+                                <a asp-action="Index" asp-controller="Submission" asp-route-assignmentId="@assignment.Id" class="btn btn-sm btn-outline-success">
+                                    <i class="bi bi-eye"></i> Submissions
+                                </a>
+                                <a asp-action="Edit" asp-route-id="@assignment.Id" class="btn btn-sm btn-outline-warning">
+                                    <i class="bi bi-pencil"></i> Edit
+                                </a>
+                                @if (assignment.IsArchived)
+                                {
+                                    <a asp-action="UnArchive" asp-route-id="@assignment.Id" class="btn btn-sm btn-success">
+                                        <i class="bi bi-arrow-up-circle"></i> Unarchive
+                                    </a>
+                                }
+                                else
+                                {
+                                    <a asp-action="Archive" asp-route-id="@assignment.Id" class="btn btn-sm btn-danger">
+                                        <i class="bi bi-archive"></i> Archive
+                                    </a>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+@section Scripts{
+<partial name="_ToastrMessage" />
+}

@@ -1,0 +1,105 @@
+﻿@model List<FacultyAssignmentViewModel>
+@{
+    ViewData["Title"] = "Assignments Created";
+    var classroomList = Model.Select(a => a.ClassroomName).Distinct().OrderBy(c => c).ToList();
+}
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="text-primary">Assignments Created</h3>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-6 mb-2">
+            <div class="input-group shadow-sm">
+                <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                <input type="text" id="searchInput" class="form-control" placeholder="Search by title...">
+            </div>
+        </div>
+        <div class="col-md-6 mb-2">
+            <select id="classroomFilter" class="form-select shadow-sm">
+                <option value="">Filter by classroom</option>
+                @foreach (var classroom in classroomList)
+                {
+                    <option value="@classroom">@classroom</option>
+                }
+            </select>
+        </div>
+    </div>
+
+    <div class="table-responsive shadow-sm rounded">
+        <table class="table table-hover table-bordered align-middle shadow-sm" id="facultyAssignmentsTable">
+            <thead class="table-dark">
+                <tr>
+                    <th>Title</th>
+                    <th>Classroom</th>
+                    <th>No. of Submissions</th>
+                    <th>Average Grade</th>
+                    <th class="text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="5" class="text-center text-muted">No assignments found.</td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.Title</td>
+                            <td>@item.ClassroomName</td>
+                            <td><span class="badge bg-info">@item.SubmissionCount</span></td>
+                            <td>
+                                @if (item.AverageGrade.HasValue)
+                                {
+                                    <span class="badge bg-success">@item.AverageGrade.Value.ToString("F2")</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">N/A</span>
+                                }
+                            </td>
+                            <td class="text-center">
+                                <a asp-action="Index" asp-controller="Submission" asp-route-assignmentId="@item.AssignmentId" class="btn btn-sm btn-outline-success">
+                                    <i class="bi bi-folder2-open"></i> View Submissions
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+@section Scripts {
+    <script>
+        const searchInput = document.getElementById("searchInput");
+        const classroomFilter = document.getElementById("classroomFilter");
+        const tableRows = document.querySelectorAll("#facultyAssignmentsTable tbody tr");
+
+        function filterTable() {
+            const searchValue = searchInput.value.toLowerCase();
+            const selectedClassroom = classroomFilter.value.toLowerCase();
+
+            tableRows.forEach(row => {
+                const title = row.cells[0].textContent.toLowerCase();
+                const classroom = row.cells[1].textContent.toLowerCase();
+
+                const matchesTitle = title.includes(searchValue);
+                const matchesClassroom = selectedClassroom === "" || classroom === selectedClassroom;
+
+                row.style.display = (matchesTitle && matchesClassroom) ? "" : "none";
+            });
+        }
+
+        searchInput.addEventListener("input", filterTable);
+        classroomFilter.addEventListener("change", filterTable);
+    </script>
+}

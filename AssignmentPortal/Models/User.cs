@@ -15,9 +15,7 @@ namespace AssignmentPortal.Models
         [MinLength(6)]
         public string PasswordHash { get; set; } = null!;
         [Required]
-        public string Role { get; set; } = null!; // e.g., "Student", "Teacher", "Admin"
+        public string Role { get; set; } = null!;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public ICollection<Submission>? Submissions { get; set; }
-        public ICollection<Assignment>? CreatedAssignments { get; set; }
     }
 }

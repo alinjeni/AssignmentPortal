@@ -1,0 +1,236 @@
+﻿<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const chartData = {
+        grades: {
+            labels: @Html.Raw(Json.Serialize((Model as StudentDashboardViewModel)?.AssignmentTitles ?? new List<string>())),
+            data: @Html.Raw(Json.Serialize((Model as StudentDashboardViewModel)?.AssignmentGrades ?? new List<double>()))
+        },
+        submissions: {
+            labels: ['Submitted', 'Pending'],
+            data: [@(Model is StudentDashboardViewModel ? Model.SubmittedCount : 0), @(Model is StudentDashboardViewModel ? Model.PendingCount : 0)]
+        },
+        progress: {
+            labels: @Html.Raw(Json.Serialize((Model as StudentDashboardViewModel)?.ProgressDates ?? new List<string>())),
+            data: @Html.Raw(Json.Serialize((Model as StudentDashboardViewModel)?.ProgressScores ?? new List<double>()))
+        },
+        performanceDistribution: {
+            labels: ['90-100', '75-89', '60-74', 'Below 60'],
+            data: @Html.Raw(Json.Serialize((Model as StudentDashboardViewModel)?.PerformanceBuckets ?? new List<int>()))
+        },
+        assignmentsPerClassroom: {
+            labels: @Html.Raw(Json.Serialize((Model as FacultyDashboardViewModel)?.ClassroomNames ?? new List<string>())),
+            data: @Html.Raw(Json.Serialize((Model as FacultyDashboardViewModel)?.AssignmentsPerClassroom ?? new List<int>()))
+        },
+        classAverage: {
+            labels: @Html.Raw(Json.Serialize((Model as FacultyDashboardViewModel)?.AssignmentTitles ?? new List<string>())),
+            data: @Html.Raw(Json.Serialize((Model as FacultyDashboardViewModel)?.AverageGrades ?? new List<double>()))
+        },
+        submissionsPerStudent: {
+            labels: @Html.Raw(Json.Serialize((Model as FacultyDashboardViewModel)?.StudentNames ?? new List<string>())),
+            data: @Html.Raw(Json.Serialize((Model as FacultyDashboardViewModel)?.SubmissionsPerStudent ?? new List<int>()))
+        }
+    };
+
+    let chartInstance;
+
+    const baseOptions = {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'top',
+                labels: {
+                    color: '#333',
+                    font: {
+                        size: 14,
+                        family: 'Segoe UI, sans-serif'
+                    }
+                }
+            },
+            title: {
+                display: true,
+                text: '',
+                font: {
+                    size: 18,
+                    weight: 'bold',
+                    family: 'Segoe UI, sans-serif'
+                },
+                color: '#111'
+            },
+            tooltip: {
+                backgroundColor: '#f0f0f0',
+                titleColor: '#000',
+                bodyColor: '#000',
+                borderWidth: 1,
+                borderColor: '#ccc'
+            }
+        },
+        scales: {
+            x: {
+                ticks: {
+                    color: '#333',
+                    font: {
+                        size: 12
+                    }
+                },
+                grid: {
+                    display: false
+                }
+            },
+            y: {
+                ticks: {
+                    color: '#333',
+                    font: {
+                        size: 12
+                    },
+                    beginAtZero: true
+                },
+                grid: {
+                    color: '#e0e0e0'
+                }
+            }
+        }
+    };
+
+    function renderChart(type) {
+        const ctx = document.getElementById('dashboardChart').getContext('2d');
+
+        const configMap = {
+            grades: {
+                type: 'bar',
+                data: {
+                    labels: chartData.grades.labels,
+                    datasets: [{
+                        label: 'Grades',
+                        data: chartData.grades.data,
+                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    ...baseOptions,
+                    plugins: { ...baseOptions.plugins, title: { ...baseOptions.plugins.title, text: 'Assignment Grades' } }
+                }
+            },
+            submissions: {
+                type: 'pie',
+                data: {
+                    labels: chartData.submissions.labels,
+                    datasets: [{
+                        label: 'Submissions',
+                        data: chartData.submissions.data,
+                        backgroundColor: ['#28a745', '#dc3545'],
+                        borderColor: ['#1e7e34', '#c82333'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    ...baseOptions,
+                    plugins: { ...baseOptions.plugins, title: { ...baseOptions.plugins.title, text: 'Submission Status' } }
+                }
+            },
+            progress: {
+                type: 'line',
+                data: {
+                    labels: chartData.progress.labels,
+                    datasets: [{
+                        label: 'Progress Over Time',
+                        data: chartData.progress.data,
+                        fill: false,
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    ...baseOptions,
+                    plugins: { ...baseOptions.plugins, title: { ...baseOptions.plugins.title, text: 'Progress Trend' } }
+                }
+            },
+            performanceDistribution: {
+                type: 'bar',
+                data: {
+                    labels: chartData.performanceDistribution.labels,
+                    datasets: [{
+                        label: 'Students',
+                        data: chartData.performanceDistribution.data,
+                        backgroundColor: 'rgba(153, 102, 255, 0.6)',
+                        borderColor: 'rgba(153, 102, 255, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    ...baseOptions,
+                    plugins: { ...baseOptions.plugins, title: { ...baseOptions.plugins.title, text: 'Performance Distribution' } }
+                }
+            },
+            assignmentsPerClassroom: {
+                type: 'bar',
+                data: {
+                    labels: chartData.assignmentsPerClassroom.labels,
+                    datasets: [{
+                        label: 'Assignments per Classroom',
+                        data: chartData.assignmentsPerClassroom.data,
+                        backgroundColor: 'rgba(255, 159, 64, 0.6)',
+                        borderColor: 'rgba(255, 159, 64, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    ...baseOptions,
+                    plugins: { ...baseOptions.plugins, title: { ...baseOptions.plugins.title, text: 'Assignments per Classroom' } }
+                }
+            },
+            classAverage: {
+                type: 'line',
+                data: {
+                    labels: chartData.classAverage.labels,
+                    datasets: [{
+                        label: 'Class Average',
+                        data: chartData.classAverage.data,
+                        borderColor: '#007bff',
+                        backgroundColor: '#cce5ff',
+                        fill: false,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    ...baseOptions,
+                    plugins: { ...baseOptions.plugins, title: { ...baseOptions.plugins.title, text: 'Class Average Grades' } }
+                }
+            },
+            submissionsPerStudent: {
+                type: 'bar',
+                data: {
+                    labels: chartData.submissionsPerStudent.labels,
+                    datasets: [{
+                        label: 'Submissions',
+                        data: chartData.submissionsPerStudent.data,
+                        backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    ...baseOptions,
+                    indexAxis: 'y',
+                    plugins: { ...baseOptions.plugins, title: { ...baseOptions.plugins.title, text: 'Submissions per Student' } }
+                }
+            }
+        };
+
+        if (chartInstance) {
+            chartInstance.destroy();
+        }
+
+        chartInstance = new Chart(ctx, configMap[type]);
+    }
+
+    document.getElementById('chartTypeSelector').addEventListener('change', function () {
+        renderChart(this.value);
+    });
+
+    window.onload = () => {
+        renderChart(document.getElementById('chartTypeSelector').value);
+    };
+</script>

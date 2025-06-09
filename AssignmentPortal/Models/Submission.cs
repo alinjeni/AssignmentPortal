@@ -5,18 +5,15 @@ namespace AssignmentPortal.Models
     public class Submission
     {
         public int Id { get; set; }
-        public int AssignmentId { get; set; } // Foreign key to Assignment
-        public Assignment Assignment { get; set; } = null!; // Navigation property to Assignment
-        public int UserId { get; set; } // Foreign key to User
-        public User User { get; set; } = null!; // Navigation property to User
+        public int AssignmentId { get; set; }
+        public int UserId { get; set; } 
         [Required]
         [StringLength(1000)]
-        public string Content { get; set; } = null!; // Content of the submission
+        public string Content { get; set; } = null!;
         [DataType(DataType.DateTime)]
-        public DateTime SubmittedAt { get; set; } = DateTime.UtcNow; // Timestamp of submission
-        public DateTime? GradedAt { get; set; } // Nullable to allow for ungraded submissions
-        public string? Feedback { get; set; } // Optional feedback from the teacher
-        public double? TotalGrade { get; set; } // Nullable to allow for ungraded submissions
-        public ICollection<SubmissionFile> SubmissionFiles { get; set; } = new List<SubmissionFile>();
+        public DateTime SubmittedAt { get; set; } = DateTime.UtcNow; 
+        public DateTime? GradedAt { get; set; } 
+        public string? Feedback { get; set; } 
+        public double? TotalGrade { get; set; } 
     }
 }

@@ -1,0 +1,78 @@
+﻿@using Microsoft.AspNetCore.Authorization
+@model IEnumerable<Classroom>
+
+@{
+    ViewData["Title"] = "Classrooms";
+    bool showArchived = ViewBag.ShowArchived ?? false;
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-primary mb-0">Classrooms</h2>
+
+        <div class="d-flex align-items-center gap-2">
+            <div class="btn-group me-2">
+                <a asp-action="Index" asp-route-showArchived="false" class="btn btn-sm btn-outline-secondary @(showArchived ? "" : "active")">Active</a>
+                <a asp-action="Index" asp-route-showArchived="true" class="btn btn-sm btn-outline-secondary @(showArchived ? "active" : "")">Archived</a>
+            </div>
+
+            @if (User.IsInRole("Faculty"))
+            {
+                <a asp-action="Create" class="btn btn-sm btn-primary shadow-sm">
+                    <i class="bi bi-plus-circle me-1"></i> New Classroom
+                </a>
+            }
+        </div>
+    </div>
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="alert alert-info text-center rounded shadow-sm">
+            No @(showArchived ? "archived" : "active") classrooms found.
+        </div>
+    }
+    else
+    {
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            @foreach (var classroom in Model)
+            {
+                <div class="col">
+                    <div class="card h-100 shadow-sm border-0 border-start border-4 border-@(classroom.IsArchived ? "secondary" : "primary")">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <a asp-controller="Assignment" asp-action="List" asp-route-classroomId="@classroom.Id" class="text-decoration-none text-dark fw-semibold">
+                                    @classroom.Name
+                                </a>
+                            </h5>
+                            <p class="card-text text-muted">@classroom.Description</p>
+                            @if (!User.IsInRole("Faculty"))
+                            {
+                                <p class="text-muted small mb-0"><i class="bi bi-person-circle me-1"></i> Faculty: <strong>@classroom.CreatedByName</strong></p>
+                            }
+                        </div>
+
+                        @if (User.IsInRole("Faculty"))
+                        {
+                            <div class="card-footer bg-white border-top d-flex justify-content-end flex-wrap gap-1">
+                                <a asp-action="ManageStudents" asp-route-id="@classroom.Id" class="btn btn-outline-info btn-sm">Manage</a>
+                                <a asp-action="Edit" asp-route-id="@classroom.Id" class="btn btn-outline-warning btn-sm">Edit</a>
+
+                                @if (classroom.IsArchived)
+                                {
+                                    <a asp-action="UnArchive" asp-route-id="@classroom.Id" class="btn btn-outline-success btn-sm">Unarchive</a>
+                                }
+                                else
+                                {
+                                    <a asp-action="Archive" asp-route-id="@classroom.Id" class="btn btn-outline-danger btn-sm">Archive</a>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+@section Scripts{
+<partial name="_ToastrMessage" />
+}

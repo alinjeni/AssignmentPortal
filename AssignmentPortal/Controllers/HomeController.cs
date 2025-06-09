@@ -1,9 +1,13 @@
 using System.Diagnostics;
 using AssignmentPortal.Models;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AssignmentPortal.Controllers
 {
+    [Authorize]
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
@@ -15,6 +19,7 @@ namespace AssignmentPortal.Controllers
 
         public IActionResult Index()
         {
+         
             return View();
         }
 

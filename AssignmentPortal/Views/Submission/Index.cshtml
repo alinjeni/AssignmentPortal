@@ -1,0 +1,77 @@
+﻿@model IEnumerable<Submission>
+@{
+    ViewData["Title"] = "Submissions";
+    var classroomId = ViewBag.ClassroomId;
+}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="mb-0"><i class="bi bi-journal-text me-2"></i>Submissions</h3>
+    <a asp-controller="Assignment" asp-action="List" asp-route-classroomId="@classroomId" class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-arrow-left-circle me-1"></i> Back to Assignments
+    </a>
+</div>
+
+<div class="table-responsive shadow-sm rounded">
+    <table class="table table-hover table-bordered align-middle mb-0">
+        <thead class="table-primary text-center">
+            <tr>
+                <th>User</th>
+                <th>Content</th>
+                <th>Submitted At</th>
+                <th>Grade</th>
+                <th>Feedback</th>
+                @if (User.IsInRole("Faculty"))
+                {
+                    <th>Actions</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model == null || !Model.Any())
+            {
+                <tr>
+                    <td colspan="@(User.IsInRole("Faculty") ? "6" : "5")" class="text-center text-muted py-4">
+                        <i class="bi bi-info-circle me-1"></i>No submissions found.
+                    </td>
+                </tr>
+            }
+            else
+            {
+                @foreach (var s in Model)
+                {
+                    <tr>
+                        <td class="fw-medium">@s.UserId</td>
+                        <td>@s.Content</td>
+                        <td>@s.SubmittedAt.ToString("g")</td>
+                        <td>@(s.TotalGrade.HasValue ? s.TotalGrade.Value.ToString("0.##") : "-")</td>
+                        <td>@(string.IsNullOrWhiteSpace(s.Feedback) ? "-" : s.Feedback)</td>
+                        @if (User.IsInRole("Faculty"))
+                        {
+                            <td>
+                                <div class="d-flex gap-2">
+                                    <a href="@Url.Action("Details", "Submission", new { id = s.Id })" class="btn btn-sm btn-outline-success">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    @if (s.GradedAt != null)
+                                    {
+                                        <span class="btn btn-sm btn-outline-secondary disabled">
+                                            <i class="bi bi-check-circle"></i>
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <a href="@Url.Action("Assess", "Assessment", new { submissionId = s.Id })" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </a>
+                                    }
+                                </div>
+                            </td>
+                        }
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+@section Scripts{
+    <partial name="_ToastrMessage" />
+}

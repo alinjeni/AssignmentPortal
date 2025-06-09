@@ -1,0 +1,78 @@
+﻿@model LoginViewModel
+
+@{
+    ViewData["Title"] = "Login Page";
+}
+
+<div class="container mt-5">
+    <div class="text-center mb-4">
+        <h2 class="fw-bold text-primary">Welcome to the Student Assignment Portal</h2>
+        <p class="text-muted">Please choose your role to log in</p>
+    </div>
+
+    <div class="d-flex justify-content-center gap-4 mb-5">
+        <button class="btn btn-outline-primary px-4 py-2 rounded-pill shadow-sm" onclick="showLoginForm('student')">
+            <i class="bi bi-person fs-5 me-1"></i> Student Login
+        </button>
+        <button class="btn btn-outline-secondary px-4 py-2 rounded-pill shadow-sm" onclick="showLoginForm('faculty')">
+            <i class="bi bi-person-badge fs-5 me-1"></i> Faculty Login
+        </button>
+    </div>
+
+    @if (ViewData["LoginError"] != null)
+    {
+        <div class="alert alert-danger text-center w-50 mx-auto shadow-sm">
+            @ViewData["LoginError"]
+        </div>
+    }
+
+
+    <div id="loginFormContainer" class="card shadow-lg border-0 w-50 w-md-75 w-lg-50 mx-auto" style="display:none;">
+        <div class="card-header bg-gradient bg-primary text-white text-center">
+            <h5 id="formTitle" class="mb-0 fw-semibold"></h5>
+        </div>
+        <div class="card-body">
+            <form asp-controller="User" asp-action="Login" method="post">
+                <input type="hidden" asp-for="Role" id="loginRole" />
+
+                <div class="mb-3">
+                    <label asp-for="Email" class="form-label fw-semibold">Email Address</label>
+                    <input asp-for="Email" class="form-control shadow-sm" placeholder="you@example.com" />
+                    <span asp-validation-for="Email" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Password" class="form-label fw-semibold">Password</label>
+                    <input asp-for="Password" class="form-control shadow-sm" type="password" placeholder="Enter password" />
+                    <span asp-validation-for="Password" class="text-danger small"></span>
+                </div>
+
+                <div class="d-flex justify-content-end mt-4">
+                    <button type="submit" class="btn btn-success px-4 shadow-sm">
+                        <i class="bi bi-box-arrow-in-right me-1"></i> Login
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <partial name="_ToastrMessage" />
+    <script>
+        window.onload = function () {
+            const selectedRole = '@ViewData["SelectedRole"]';
+            if (selectedRole) {
+                showLoginForm(selectedRole);
+            }
+        };
+        function showLoginForm(role) {
+            const container = document.getElementById("loginFormContainer");
+            container.style.display = "block";
+            document.getElementById("formTitle").innerText = (role === 'student' ? "Student" : "Faculty") + " Login";
+            document.getElementById("loginRole").value = role;
+            document.title = (role === 'student' ? "Student" : "Faculty") + " Login";
+        }
+    </script>
+}

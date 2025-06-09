@@ -1,0 +1,29 @@
+﻿@model IEnumerable<AssignmentComment>
+
+<div class="mt-4">
+    <h5 class="mb-3 text-secondary">Comments</h5>
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="alert alert-light text-muted text-center">
+            No comments yet. Be the first to comment!
+        </div>
+    }
+    else
+    {
+        @foreach (var comment in Model)
+        {
+            <div class="card mb-3 shadow-sm border-0">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <strong class="text-primary">@comment.UserName</strong>
+                        </div>
+                        <small class="text-muted">@comment.CreatedAt.ToString("g")</small>
+                    </div>
+                    <p class="mt-2 mb-0">@comment.Content</p>
+                </div>
+            </div>
+        }
+    }
+</div>

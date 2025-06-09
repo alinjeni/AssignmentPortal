@@ -1,0 +1,146 @@
+﻿@model List<StudentAssignmentViewModel>
+
+@{
+    ViewData["Title"] = "My Assignments";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <h3 class="text-primary mb-4">📝 My Assignments</h3>
+
+    <div class="row mb-3 gx-3">
+        <div class="col-md-6 mb-2">
+            <div class="input-group shadow-sm">
+                <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                <input type="text" id="searchInput" placeholder="Search by title..." class="form-control" />
+            </div>
+        </div>
+        <div class="col-md-3 mb-2">
+            <select id="filterSelect" class="form-select shadow-sm">
+                <option value="all">All</option>
+                <option value="submitted">Submitted</option>
+                <option value="notsubmitted">Not Submitted</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="table-responsive shadow-sm rounded">
+        <table class="table table-bordered table-hover align-middle" id="assignmentsTable">
+            <thead class="table-dark">
+                <tr>
+                    <th>Title</th>
+                    <th>Due Date</th>
+                    <th>Classroom</th>
+                    <th>Submitted</th>
+                    <th>Graded</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model == null || !Model.Any())
+                {
+                    <tr>
+                        <td colspan="5" class="text-center text-muted">No assignments found.</td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                <a asp-action="Details" asp-controller="Assignment" asp-route-id="@item.AssignmentId" class="text-decoration-none fw-semibold text-primary">
+                                    @item.Title
+                                </a>
+                            </td>
+                            <td>@item.DueDate.ToString("dd MMM yyyy")</td>
+                            <td>@item.ClassroomName</td>
+                            <td>
+                                <span class="badge @(item.IsSubmitted ? "bg-success" : "bg-warning")">
+                                    @(item.IsSubmitted ? "Yes" : "No")
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge @(item.IsGraded ? "bg-info" : "bg-secondary")">
+                                    @(item.IsGraded ? "Graded" : "Not Yet")
+                                </span>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div id="paginationControls" class="mt-3 d-flex flex-wrap gap-2"></div>
+</div>
+
+@section Scripts {
+    <script>
+        const rows = Array.from(document.querySelectorAll("#assignmentsTable tbody tr"));
+        const pageSize = 20;
+        let currentPage = 1;
+
+        function filterRows() {
+            const search = document.getElementById("searchInput").value.toLowerCase();
+            const filter = document.getElementById("filterSelect").value;
+
+            return rows.filter(row => {
+                const title = row.cells[0].textContent.toLowerCase();
+                const isSubmitted = row.cells[3].textContent.trim().toLowerCase() === "yes";
+
+                const matchSearch = title.includes(search);
+                const matchFilter =
+                    filter === "all" ||
+                    (filter === "submitted" && isSubmitted) ||
+                    (filter === "notsubmitted" && !isSubmitted);
+
+                return matchSearch && matchFilter;
+            });
+        }
+
+        function renderPage(filteredRows, page) {
+            const start = (page - 1) * pageSize;
+            const end = start + pageSize;
+            rows.forEach(r => r.style.display = "none");
+            filteredRows.slice(start, end).forEach(r => r.style.display = "");
+        }
+
+        function renderPagination(total) {
+            const totalPages = Math.ceil(total / pageSize);
+            const pagination = document.getElementById("paginationControls");
+            pagination.innerHTML = "";
+
+            for (let i = 1; i <= totalPages; i++) {
+                const btn = document.createElement("button");
+                btn.textContent = i;
+                btn.className = "btn btn-outline-primary btn-sm";
+                if (i === currentPage) {
+                    btn.classList.add("active");
+                }
+                btn.addEventListener("click", () => {
+                    currentPage = i;
+                    applyFilters();
+                });
+                pagination.appendChild(btn);
+            }
+        }
+
+        function applyFilters() {
+            const filtered = filterRows();
+            renderPage(filtered, currentPage);
+            renderPagination(filtered.length);
+        }
+
+        document.getElementById("searchInput").addEventListener("keyup", () => {
+            currentPage = 1;
+            applyFilters();
+        });
+
+        document.getElementById("filterSelect").addEventListener("change", () => {
+            currentPage = 1;
+            applyFilters();
+        });
+
+        window.onload = () => applyFilters();
+    </script>
+}

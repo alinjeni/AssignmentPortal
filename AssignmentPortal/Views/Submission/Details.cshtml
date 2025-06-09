@@ -1,0 +1,122 @@
+﻿@model SubmissionDetailsViewModel
+
+<div class="container mt-4">
+
+    <div class="mb-3">
+        @if (User.IsInRole("Student"))
+        {
+            <a asp-controller="Assignment" asp-action="Details" asp-route-id="@Model.Submission.AssignmentId" class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-box-arrow-left"></i> Back to Assignment
+            </a>
+        }
+        else
+        {
+            <a asp-controller="Submission" asp-action="Index" asp-route-assignmentId="@Model.Submission.AssignmentId" class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-box-arrow-left"></i> Back to Submissions
+            </a>
+        }
+    </div>
+
+    <h3 class="mb-4 text-primary">Submission Details</h3>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Submitted Content</h5>
+            <p class="card-text">@Model.Submission.Content</p>
+            <p class="text-muted"><small>Submitted At: @Model.Submission.SubmittedAt.ToString("f")</small></p>
+        </div>
+    </div>
+
+    @if (Model.Files != null && Model.Files.Any())
+    {
+        <h5 class="text-dark"><i class="bi bi-paperclip me-1"></i> Attached Files</h5>
+        <ul class="list-group mb-4">
+            @foreach (var file in Model.Files)
+            {
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <a href="@Url.Content(file.FilePath)" target="_blank" class="text-decoration-none">
+                        <i class="bi bi-file-earmark-text me-2"></i>@file.FileName
+                    </a>
+                    @if (Model.Submission.GradedAt == null && User.IsInRole("Student"))
+                    {
+                        <form asp-action="DeleteFile" asp-controller="Submission" method="post" class="ms-3 mb-0" onsubmit="return confirm('Delete this file?')">
+                            <input type="hidden" name="fileId" value="@file.Id" />
+                            <input type="hidden" name="submissionId" value="@Model.Submission.Id" />
+                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete file">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
+                    }
+                </li>
+            }
+        </ul>
+    }
+
+    <div class="d-flex flex-wrap gap-3 mb-4">
+        @if (Model.Submission.GradedAt == null && User.IsInRole("Student"))
+        {
+            <a asp-action="Edit" asp-route-id="@Model.Submission.Id" class="btn btn-warning shadow-sm">
+                <i class="bi bi-pencil-square me-1"></i> Edit Submission
+            </a>
+            <form asp-action="DeleteSubmission" method="post" onsubmit="return confirm('Are you sure you want to delete this submission?')" class="d-inline">
+                <input type="hidden" name="submissionId" value="@Model.Submission.Id" />
+                <button type="submit" class="btn btn-danger shadow-sm">
+                    <i class="bi bi-trash me-1"></i> Delete Submission
+                </button>
+            </form>
+        }
+        @if (Model.Submission.GradedAt == null && User.IsInRole("Faculty"))
+        {
+            <a asp-action="Assess" asp-controller="Assessment" asp-route-submissionId="@Model.Submission.Id" class="btn btn-primary shadow-sm">
+                <i class="bi bi-check2-circle me-1"></i> Grade
+            </a>
+        }
+    </div>
+
+    @if (Model.Assessment != null)
+    {
+        <h3 class="mb-3 text-success">Assessment Details</h3>
+        <p class="text-muted mb-3"><small>Assessed At: @Model.Assessment.AssessedAt.ToString("f")</small></p>
+
+        <div class="table-responsive shadow-sm rounded">
+            <table class="table table-striped table-bordered align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Criterion</th>
+                        <th>Description</th>
+                        <th>Max Score</th>
+                        <th>Score</th>
+                        <th>Remarks</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.CriteriaResults)
+                    {
+                        <tr>
+                            <td>@item.CriterionName</td>
+                            <td>@item.Description</td>
+                            <td>@item.MaxScore</td>
+                            <td>@item.Score</td>
+                            <td>@item.Remarks</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="mt-4">
+            <h5>Feedback</h5>
+            <p>@Model.Submission.Feedback</p>
+
+            <h5>Total Grade</h5>
+            <p><span class="badge bg-success fs-5">@Model.Submission.TotalGrade</span></p>
+        </div>
+    }
+    else
+    {
+        <p class="text-muted fst-italic mt-4">This submission has not been assessed yet.</p>
+    }
+</div>
+@section Scripts{
+    <partial name="_ToastrMessage" />
+}

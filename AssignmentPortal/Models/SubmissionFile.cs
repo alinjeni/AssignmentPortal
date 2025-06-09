@@ -4,20 +4,18 @@ namespace AssignmentPortal.Models
 {
     public class SubmissionFile
     {
-        public int Id { get; set; } // Unique identifier for the file
-        public int SubmissionId { get; set; } // Foreign key to Submission
-        public Submission Submission { get; set; } = null!; // Navigation property to Submission
+        public int Id { get; set; }
+        public int SubmissionId { get; set; }
         [Required]
         [StringLength(200)]
-        public string FileName { get; set; } = null!; // Name of the file
+        public string FileName { get; set; } = null!;
         [Required]
         [StringLength(500)]
-        public string FilePath { get; set; } = null!; // Path where the file is stored
-        public long? FileSize { get; set; } // Size of the file in bytes
+        public string FilePath { get; set; } = null!;
+        public long? FileSize { get; set; }
         [StringLength(100)]
-        public string? MimeType { get; set; } // MIME type of the file
-        public DateTime UploadedAt { get; set; } = DateTime.UtcNow; // Timestamp of file upload
-        public int UploadedById { get; set; } // User ID of the uploader
-        public User UploadedBy { get; set; } = null!; // Navigation property to User (uploader)
+        public string? MimeType { get; set; } 
+        public DateTime UploadedAt { get; set; } = DateTime.UtcNow;
+        public int UploadedById { get; set; } 
     }
 }

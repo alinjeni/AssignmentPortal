@@ -1,0 +1,61 @@
+﻿@model List<StudentSubmissionViewModel>
+@{
+    ViewData["Title"] = "My Submissions";
+}
+
+<div class="container mt-4">
+
+    <h3 class="mb-4 text-primary">@ViewData["Title"]</h3>
+
+    <div class="table-responsive shadow-sm rounded">
+        <table class="table table-bordered table-hover align-middle" id="assignmentsTable">
+            <thead class="table-dark">
+                <tr>
+                    <th scope="col">Assignment</th>
+                    <th scope="col">Submitted At</th>
+                    <th scope="col" class="text-center">Total Grade</th>
+                    <th scope="col">Feedback</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model == null || !Model.Any())
+                {
+                    <tr>
+                        <td colspan="4" class="text-center text-muted fst-italic py-4">No submissions found.</td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.AssignmentTitle</td>
+                            <td>@item.SubmittedAt.ToString("g")</td>
+                            <td class="text-center">
+                                @if (item.TotalGrade.HasValue)
+                                {
+                                    <span class="badge bg-success px-3">@item.TotalGrade</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary px-3">Pending</span>
+                                }
+                            </td>
+                            <td>
+                                @if (!string.IsNullOrWhiteSpace(item.Feedback))
+                                {
+                                    <span class="text-muted">@item.Feedback</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted fst-italic">No feedback yet</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+
+</div>

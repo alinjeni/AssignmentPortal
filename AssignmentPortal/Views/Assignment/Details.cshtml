@@ -1,0 +1,86 @@
+﻿@model AssignmentDetailsViewModel
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <a asp-action="List" asp-route-classroomId="@Model.Assignment.ClassroomId" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-left-circle me-1"></i> Back to Assignments
+        </a>
+    </div>
+
+    <div class="mb-4">
+        <h3 class="text-primary">@Model.Assignment.Title</h3>
+        <p class="text-muted">@Model.Assignment.Description</p>
+        <p>
+            <strong>Due Date:</strong>
+            <span class="badge bg-warning">
+                @Model.Assignment.DueDate.ToString("MMMM dd, yyyy")
+            </span>
+        </p>
+    </div>
+
+    @if (Model.Files != null && Model.Files.Any())
+    {
+        <div class="mb-5">
+            <h5 class="text-dark"><i class="bi bi-paperclip me-1"></i> Attached Files</h5>
+            <ul class="list-group mb-4">
+                @foreach (var file in Model.Files)
+                {
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <a href="@Url.Content(file.FilePath)" target="_blank" class="text-decoration-none">
+                            <i class="bi bi-file-earmark-text me-2"></i>@file.FileName
+                        </a>
+                            @if (User.IsInRole("Faculty"))
+                            {
+                                <form asp-action="DeleteFile" asp-controller="Assignment" method="post" class="mt-2">
+                                    <input type="hidden" name="fileId" value="@file.Id" />
+                                    <input type="hidden" name="assignmentId" value="@Model.Assignment.Id" />
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this file?')">
+                                        <i class="bi bi-trash-fill"></i> Delete
+                                    </button>
+                                </form>
+                            }                        
+                    </li>
+                }
+            </ul>
+        </div>
+    }
+
+    <div class="mb-4">
+        @if (Model.UserRole == "Student")
+        {
+            @if (Model.HasSubmitted)
+            {
+                <a asp-controller="Submission" asp-action="Details" asp-route-id="@Model.SubmissionId" class="btn btn-outline-secondary">
+                    <i class="bi bi-eye"></i> View Submission
+                </a>
+            }
+            else
+            {
+                <a asp-controller="Submission" asp-action="Create" asp-route-assignmentId="@Model.Assignment.Id" class="btn btn-success">
+                    <i class="bi bi-upload"></i> Submit Assignment
+                </a>
+            }
+        }
+        else
+        {
+            <a href="@Url.Action("Index", "Submission", new { assignmentId = @Model.Assignment.Id })" class="btn btn-primary">
+                <i class="bi bi-people-fill me-1"></i> View Submissions
+            </a>
+        }
+    </div>
+
+    <div class="mb-5">
+        <h5 class="text-dark"><i class="bi bi-chat-left-text me-1"></i> Comments</h5>
+
+        <div class="border rounded p-3 mb-3 bg-light" style="max-height: 300px; overflow-y: auto;">
+            <partial name="_AssignmentCommentsPartial" model="Model.Comments" />
+        </div>
+
+        <partial name="_AddCommentPartial" model="new AssignmentComment { AssignmentId = Model.Assignment.Id }" />
+    </div>
+
+</div>
+@section Scripts{
+    <partial name="_ToastrMessage" />
+}
