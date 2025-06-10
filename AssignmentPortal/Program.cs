@@ -31,6 +31,8 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var seeder = scope.ServiceProvider.GetRequiredService<DatabaseSeeder>();
+    await seeder.CreateStoredProcedureAsync();
+    await seeder.RunStoredProcedureAsync();
     await seeder.SeedUsersAsync();
 }
 
