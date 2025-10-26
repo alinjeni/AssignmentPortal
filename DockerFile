@@ -1,12 +1,17 @@
-# Use official .NET SDK image to build
+# Build stage
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
-COPY . .
-RUN dotnet restore
-RUN dotnet publish -c Release -o /app
 
-# Build runtime image
-FROM mcr.microsoft.com/dotnet/aspnet:7.0
+# Copy solution and project files
+COPY AssignmentPortal.sln ./
+COPY AssignmentPortal/ ./AssignmentPortal/
+
+# Restore dependencies and publish
+RUN dotnet restore AssignmentPortal/AssignmentPortal.csproj
+RUN dotnet publish AssignmentPortal/AssignmentPortal.csproj -c Release -o /app/publish
+
+# Runtime stage
+FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS final
 WORKDIR /app
-COPY --from=build /app .
+COPY --from=build /app/publish .
 ENTRYPOINT ["dotnet", "AssignmentPortal.dll"]
