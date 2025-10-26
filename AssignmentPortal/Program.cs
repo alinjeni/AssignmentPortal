@@ -49,12 +49,18 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapStaticAssets();
+//app.MapStaticAssets();
+
+//app.MapControllerRoute(
+//    name: "default",
+//    pattern: "{controller=Dashboard}/{action=Index}/{id?}")
+//    .WithStaticAssets();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Dashboard}/{action=Index}/{id?}")
-    .WithStaticAssets();
+    pattern: "{controller=Dashboard }/{action=Index}/{id?}"
+);
 
+app.UseStaticFiles();
 
 app.Run();
